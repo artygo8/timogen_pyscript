@@ -1,0 +1,381 @@
+<html>
+
+<head>
+    <title>Timogen</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+
+
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta content="width=device-width,initial-scale=1.0" />
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Beampipe Analytics -->
+    <script async defer src="https://beampipe.io/js/tracker.js" data-beampipe-domain="timogen-be.github.io"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+        integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        #app {
+            font-family: Avenir, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-align: left;
+            color: #2c3e50;
+            margin-top: 20px;
+        }
+
+        h1 {
+            font-size: 10vmin;
+            text-align: center;
+            color: #3f7a82;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        h2 {
+            padding: 20px 0px 30px 0px;
+            color: #fdc10a;
+            user-select: none;
+        }
+
+        #collapsable {
+            position: relative;
+            z-index: 2;
+        }
+
+        #collapseResult {
+            zoom: 0.8;
+            -moz-transform: scale(0.8);
+        }
+
+        #go_home {}
+
+        h3,
+        h4,
+        h5 {
+            color: darkgrey;
+            user-select: none;
+        }
+
+        .bg-cyan {
+            background-image: url("assets/60-lines.png");
+            background-color: #beedf7;
+        }
+
+        .form-check-input[type=checkbox] {
+            margin-top: .6rem;
+        }
+
+        :-moz-any(.form-check-input[type=checkbox]) {
+            margin-top: .9rem;
+        }
+
+        .col {
+            padding-bottom: 16px;
+        }
+
+        label {
+            padding: 6px;
+        }
+    </style>
+
+</head>
+
+<body class="container-fluid bg-cyan text-white">
+    <div id="app">
+
+        <py-config>
+            packages = ["requests", "pyodide-http"]
+        </py-config>
+        <py-script>
+            therapists = None
+        </py-script>
+
+        <div class="alert alert-info alert-dismissible">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <span class="alert-heading">Bienvenue sur Timogen. Les données utilisées datent du 1er Janvier 2023
+                (trouvable
+                <a
+                    href="https://www.riziv.fgov.be/fr/themes/cout-remboursement/par-mutualite/prestations-individuelles/prix/Pages/kine-fr.aspx">ici</a>)</span>
+        </div>
+
+        <h1>Timogen</h1>
+        <div class="container p-5 my-5 border bg-white text-dark">
+            <h2>Thérapeute</h2>
+            <div class="mb-3 d-flex flex-wrap">
+                <!-- Name -->
+                <label for="therapist_name" class="col-12 col-sm-4 col-md-3 col-lg-2 col-form-label">
+                    Nom
+                </label>
+                <div class="col">
+
+                    <py-script src="src/therapist/name.py">
+                    </py-script>
+
+                    <input id="therapist_name" class="form-control dropdown-toggle"
+                        data-toggle="available_therapist_names" aria-haspopup="true" aria-expanded="false"
+                        placeholder="Commencez à écrire..." maxlength="13" py-input="therapist_name_change()" />
+
+                    <div id="available_therapist_names" class="available_therapist_names" aria hidden="true"
+                        style="max-height: 200px; overflow:auto">
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Address -->
+            <div class="mb-3 d-flex flex-wrap">
+                <label for="therapist_address" class="col-12 col-sm-4 col-md-3 col-lg-2 col-form-label">
+                    Addresse
+                </label>
+                <div class="col">
+                    <textarea id="therapist_address" rows="2" cols="50" maxlength="200" type="address" placeholder=""
+                        class="form-control"></textarea>
+                </div>
+            </div>
+
+            <!-- inami -->
+            <div class="mb-3 d-flex flex-wrap">
+                <label for="therapist_inami" class="col-12 col-sm-4 col-md-3 col-lg-2 col-form-label">
+                    Numéro INAMI
+                </label>
+
+                <div class="col">
+                    <input id="therapist_inami" class="form-control" placeholder="0-0000000-000" maxlength="13" />
+                </div>
+            </div>
+
+            <!-- BCE -->
+            <div class="mb-3 d-flex flex-wrap">
+                <label for="therapist_bce" class="col-12 col-sm-4 col-md-3 col-lg-2 col-form-label">
+                    BCE
+                </label>
+                <div class="col">
+                    <input id="therapist_bce" class="form-control" placeholder="0000.000.000" maxlength="12" />
+                    <small>
+                        <a href="https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html?lang=fr">Trouver mon
+                            BCE...</a>
+                    </small>
+                </div>
+            </div>
+            <!-- Bank -->
+            <div class="mb-3 d-flex flex-wrap">
+                <label for="therapist_ba" class="col-12 col-sm-4 col-md-3 col-lg-2 col-form-label">
+                    Numéro de compte
+                </label>
+                <div class="col">
+                    <input id="therapist_ba" class="form-control" placeholder="BE40 XXXX XXXX XXXX" maxlength="19" />
+                </div>
+            </div>
+            <!-- contracted -->
+            <div class="mb-3 d-flex flex-wrap">
+                <label for="contracted" class="col-12 col-sm-4 col-md-3 col-lg-2 col-form-label">
+                    Conventionné
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="contracted" />
+                    </div>
+                </label>
+            </div>
+
+            <hr />
+
+            <h2>Patient</h2>
+
+            <!-- Name -->
+            <div class="mb-3 d-flex flex-wrap">
+                <label for="patient_name" class="col-12 col-sm-4 col-md-3 col-lg-2 col-form-label">
+                    Nom
+                </label>
+                <div class="col">
+                    <input id="patient_name" type="name" class="form-control" placeholder="Nom du patient" />
+                </div>
+            </div>
+
+            <!-- NISS -->
+            <div class="mb-3 d-flex flex-wrap">
+                <label for="patient_niss" class="col-12 col-sm-4 col-md-3 col-lg-2 col-form-label">
+                    NISS
+                </label>
+                <div class="col">
+                    <input id="patient_niss" class="form-control" placeholder="00000000000" maxlength="15" />
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="mb-3 d-flex flex-wrap">
+                <label for="patient_address" class="col-12 col-sm-4 col-md-3 col-lg-2 col-form-label">
+                    Addresse
+                </label>
+                <div class="col">
+                    <textarea id="patient_address" rows="2" cols="50" maxlength="200" type="address" placeholder=""
+                        class="form-control"></textarea>
+                </div>
+
+            </div>
+
+            <!-- Tarif Préférentiel -->
+            <div class="mb-3 d-flex flex-wrap">
+                <label for="patient_address" class="col-12 col-sm-4 col-md-3 col-lg-2 col-form-label">
+                    Tarif Préférentiel
+                </label>
+                <div class="col">
+                    <input class="form-check-input" type="checkbox" id="special_tarif" />
+                </div>
+            </div>
+
+            <!-- Mutuelle -->
+            <div class="mb-3 d-flex flex-wrap">
+                <label for="patient_mutuelle" class="col-12 col-sm-4 col-md-3 col-lg-2 col-form-label">
+                    Mutuelle
+                </label>
+                <div class="col">
+                    <input id="patient_mutuality" class="form-control" placeholder="Mutuelle" maxlength="20" />
+                </div>
+            </div>
+
+
+            <!-- Mutuality Address -->
+            <div class="mb-3 d-flex flex-wrap">
+                <label for="patient_mutuality_address" class="col-12 col-sm-4 col-md-3 col-lg-2 col-form-label">
+                    Addresse Mutuelle
+                </label>
+                <div class="col">
+                    <textarea id="patient_mutuality_address" rows="2" cols="50" maxlength="200" type="address"
+                        placeholder="" class="form-control"></textarea>
+                        <small>
+                            <a href="https://www.riziv.fgov.be/fr/professionnels/autres/mutualites/pages/contactez-mutualites.aspx">Adresses des mutuelles...</a>
+                        </small>
+                    </div>
+            </div>
+            <hr />
+
+            <h2>Pathologie</h2>
+
+                <!-- Patho Location -->
+    <h5>Lieu de prestation</h5>
+    <br />
+    <div class="form-check" v-for="location in locations" :key="location.id">
+      <input
+        class="form-check-input"
+        type="radio"
+        :value="location"
+        v-model="selected_location"
+      />
+      {{ location.name }}
+    </div>
+    <br />
+    <br />
+
+    <!-- Patho -->
+    <h5>Pathologie</h5>
+    <br />
+    <div class="form-check" v-for="patho in pathos" :key="patho.name + 1000">
+      <input
+        class="form-check-input"
+        type="radio"
+        :value="patho"
+        v-model="selected_patho"
+      />
+      {{ patho.name }}
+    </div>
+    <br />
+    <br />
+
+    <!-- Seance Kinds -->
+    <div v-if="kinds.length >= 2">
+      <h5>Type des séances</h5>
+      <br />
+      <div class="form-check" v-for="kind in kinds" :key="kind">
+        <input
+          class="form-check-input"
+          type="radio"
+          :value="kind"
+        />
+        {{ kind }}
+      </div>
+      <br />
+      <br />
+    </div>
+
+    <!-- Seance Times -->
+    <div v-if="times.length >= 2">
+      <h5>Durée des séances</h5>
+      <br />
+      <div class="form-check" v-for="time in times" :key="time">
+        <input
+          class="form-check-input"
+          type="radio"
+          :value="time"
+        />
+        {{ time }}
+      </div>
+      <br />
+      <br />
+    </div>
+            <hr />
+
+            <h2>Séances</h2>
+            <Seances />
+            <hr />
+
+            <div id="collapsable" class="d-flex flex-column bd-highlight d-none d-lg-block" style="
+            right: 1px;
+            border: 0px none;
+            position: fixed;
+            width: 40%;
+            overflow: hidden;
+            bottom: 0px;
+          ">
+                <button style="margin: 10px 20% -2px 50%" class="btn btn-warning" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#collapseResult" aria-expanded="false"
+                    aria-controls="collapseResult">
+                    &darr; résultat &darr;
+                </button>
+
+                <div class="collapse" id="collapseResult">
+                    <div class="card card-body" style="height: 600px; overflow: scroll; max-width: 800px">
+                        <PDF />
+                    </div>
+                </div>
+            </div>
+
+            <vue-html2pdf :show-layout="false" :float-layout="true" :enable-download="true" :preview-modal="false"
+                :paginate-elements-by-height="1400" file :pdf-quality="2" :manual-pagination="false" pdf-format="a4"
+                pdf-orientation="p" pdf-content-width="680px" ref="html2Pdf" :html-to-pdf-options="htmltopdfoptions">
+                <section slot="pdf-content">
+                    <PDF />
+                </section>
+            </vue-html2pdf>
+
+            <button type="button" class="container-fluid btn btn-warning">
+                Générer mon justificatif
+            </button>
+        </div>
+        <a class="d-block p-5 text-center" href="mailto:arthurgossuin+timogen@gmail.com">contactez-moi</a>
+    </div>
+
+    <py-script>
+        # config (these are accessible in the global scope)
+        base_url = 'http://0.0.0.0:8000/'
+        debug = False
+
+    </py-script>
+
+    <py-script src="src/load_therapists.py" />
+    <!-- <py-script src="src/contents.py" /> -->
+
+
+    <div id="graph-area"></div>
+    </div>
+</body>
+
+
+
+
+
+
+</html>
